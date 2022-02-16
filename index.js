@@ -1,5 +1,8 @@
 const {CosmosClient} = require("@azure/cosmos");
+const Promise = require('bluebird')
 const moment = require('moment-timezone');
+const {liveVideoQuerySpec} = require("./constants")
+const {computeVideoStatus} = require("./youtubeAPI")
 
 require("dotenv").config();
 const COSMOS_ENDPOINT = process.env.COSMOS_ENDPOINT;
@@ -15,25 +18,24 @@ async function main() {
   const {database} = await client.databases.createIfNotExists({id: COSMOS_DATABASE_ID});
   const {container} = await database.containers.createIfNotExists({id: COSMOS_CONTAINER_ID});
   
-  const currentUnix = moment().tz("Asia/Kolkata").unix();
-  
-  // Raw SQL queries for live videos which got older currentTime and needs to be updated to expired
-  const querySpec = {
-    query: `SELECT * from c where c.videoStatus = 'live' and c.liveTill < '${currentUnix}'`
-  };
-  
-  
-  // read all items in the Items container
   const {resources: items} = await container.items
-    .query(querySpec)
+    .query(liveVideoQuerySpec)
     .fetchAll();
   
+  
   // Update items one by one
-  for (const item of items) {
-    console.log(`${item.id} - ${item.videoTitle}`);
-    item.videoStatus = 'expired'
-    await container.items.upsert(item);
-  }
+  // Change section IDs
+  
+  Promise.map(items, async (item) => {
+    const updatedSectionId = await computeVideoStatus(item.videoId)
+    if (updatedSectionId) {
+      await container.items.upsert(item);
+    }
+  }, {
+    concurrency: 10
+  }).catch((e) => {
+    console.log(e)
+  })
   
   
 }
