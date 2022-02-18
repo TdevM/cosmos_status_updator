@@ -1,6 +1,5 @@
 const {CosmosClient} = require("@azure/cosmos");
 const Promise = require('bluebird')
-const moment = require('moment-timezone');
 const {liveVideoQuerySpec} = require("./constants")
 const {computeVideoStatus} = require("./youtubeAPI")
 
