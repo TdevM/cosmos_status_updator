@@ -22,7 +22,7 @@ async function getBroadcastContentDetails(videoId, etag) {
   const res = await youtube.videos.list({
     part: "id,snippet,contentDetails,statistics,liveStreamingDetails", id: videoId, headers: headers,
   });
-  console.log('Status code: ' + res.status);
+  console.log('Status code from youtube API: ' + res.status);
   return res.data.items[0];
 }
 

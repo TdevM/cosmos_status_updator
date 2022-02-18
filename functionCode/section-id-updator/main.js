@@ -28,6 +28,7 @@ async function main() {
   Promise.map(items, async (item) => {
     const updatedSectionId = await computeVideoStatus(item.videoId)
     if (updatedSectionId) {
+      console.log(`Video with ${item.videoId} updated`)
       await container.items.upsert(item);
     }
   }, {
