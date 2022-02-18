@@ -40,8 +40,4 @@ async function main() {
   
 }
 
-main().then((item) => {
-
-}).catch((error) => {
-  console.error(error);
-});
+module.exports = {main}
